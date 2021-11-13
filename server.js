@@ -49,9 +49,9 @@ function start() {
         case "Add a Department":
           addDepartment();
           break;
-        // case "Add a Role":
-        //   addRole();
-        //   break;
+        case "Add a Role":
+          addRole();
+          break;
         // case "Add an Employee":
         //   addEmployee();
         //   break;
@@ -71,7 +71,15 @@ function viewDepartments() {
     console.table(response);
     exit();
   });
-};
+}
+
+function viewDepartments2() {
+    var select = `SELECT * FROM department`;
+    db.query(select, function (err, response) {
+      if (err) throw err;
+      console.table(response);
+    });
+  }
 
 function viewRoles() {
   var select = `SELECT * FROM roles`;
@@ -80,7 +88,7 @@ function viewRoles() {
     console.table(response);
     exit();
   });
-};
+}
 
 function viewEmployees() {
   var select = `SELECT * FROM employee`;
@@ -89,38 +97,74 @@ function viewEmployees() {
     console.table(response);
     exit();
   });
-};
+}
 
-function addDepartment () {
-    inquirer.prompt({
-        type: 'input',
-        name: 'newDepartment',
-        message: 'What is the name of the new department?'
-    }).then (answer => {
-        const newDepartment = answer.newDepartment;
-
-        const sql = `INSERT INTO department (department_name) VALUES (?)`;
-        db.query(sql, newDepartment, (err, response) => {
-            if (err) throw err;
-            console.log(`You have added ${newDepartment} as a new department!`);
-            exit();
-        })
+function addDepartment() {
+  inquirer
+    .prompt({
+      type: "input",
+      name: "newDepartment",
+      message: "What is the name of the new department?",
     })
+    .then((answer) => {
+      const newDepartment = answer.newDepartment;
+
+      const sql = `INSERT INTO department (department_name) VALUES (?)`;
+      db.query(sql, newDepartment, (err, response) => {
+        if (err) throw err;
+        console.log(`You have added ${newDepartment} as a new department!`);
+        exit();
+      });
+    });
+}
+
+function addRole() {
+  viewDepartments2();
+  inquirer.prompt([
+    {
+      type: "input",
+      name: "departmentId",
+      message: "What is the department ID for this role?",
+    },
+    {
+        type: 'input',
+        name: 'newRole',
+        message: 'What is the name of the new role?'
+    },
+    {
+        type: 'input',
+        name: 'salary',
+        message: 'What is the salary of this role?'
+    }
+  ]).then(answers => {
+      const newRole = answers.newRole;
+      const salary = answers.salary;
+      const departmentId = answers.departmentId;
+
+      const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+      db.query(sql, [newRole, salary, departmentId], (err, response) => {
+          if (err) throw err;
+          console.log(`You have added ${newRole} with the salary of: ${salary} as a new role!`);
+          exit();
+      })
+  })
 }
 
 function exit() {
-    inquirer.prompt({
-        type: 'confirm',
-        name: 'continue',
-        message: 'Would you like to continue?',
-        default: false
-    }).then(answer => {
-        if (answer.continue === true) {
-            start();
-        } else {
-            db.end();
-        }
+  inquirer
+    .prompt({
+      type: "confirm",
+      name: "continue",
+      message: "Would you like to continue?",
+      default: false,
     })
+    .then((answer) => {
+      if (answer.continue === true) {
+        start();
+      } else {
+        db.end();
+      }
+    });
 }
 
 db.connect((err) => {
