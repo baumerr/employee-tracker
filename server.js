@@ -46,9 +46,9 @@ function start() {
         case "View All Employees":
           viewEmployees();
           break;
-        // case "Add a Department":
-        //   addDepartment();
-        //   break;
+        case "Add a Department":
+          addDepartment();
+          break;
         // case "Add a Role":
         //   addRole();
         //   break;
@@ -90,6 +90,23 @@ function viewEmployees() {
     exit();
   });
 };
+
+function addDepartment () {
+    inquirer.prompt({
+        type: 'input',
+        name: 'newDepartment',
+        message: 'What is the name of the new department?'
+    }).then (answer => {
+        const newDepartment = answer.newDepartment;
+
+        const sql = `INSERT INTO department (department_name) VALUES (?)`;
+        db.query(sql, newDepartment, (err, response) => {
+            if (err) throw err;
+            console.log(`You have added ${newDepartment} as a new department!`);
+            exit();
+        })
+    })
+}
 
 function exit() {
     inquirer.prompt({
