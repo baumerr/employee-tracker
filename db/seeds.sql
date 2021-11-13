@@ -1,4 +1,4 @@
-INSERT INTO  department (dName)
+INSERT INTO  department (department_name)
 VALUES
     ('Infront of the Camera'),
     ('Behind the Camera');
