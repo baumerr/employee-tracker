@@ -52,12 +52,12 @@ function start() {
         case "Add a Role":
           addRole();
           break;
-        // case "Add an Employee":
-        //   addEmployee();
-        //   break;
-        // case "Update an Employee":
-        //   updateEmployee();
-        //   break;
+        case "Add an Employee":
+          addEmployee();
+          break;
+        case "Update an Employee":
+          updateEmployee();
+          break;
         default:
           db.end();
       }
@@ -90,6 +90,14 @@ function viewRoles() {
   });
 }
 
+function viewRoles2() {
+    var select = `SELECT * FROM roles`;
+    db.query(select, function (err, response) {
+      if (err) throw err;
+      console.table(response);
+    });
+  }
+
 function viewEmployees() {
   var select = `SELECT * FROM employee`;
   db.query(select, function (err, response) {
@@ -98,6 +106,14 @@ function viewEmployees() {
     exit();
   });
 }
+
+function viewEmployees2() {
+    var select = `SELECT * FROM employee`;
+    db.query(select, function (err, response) {
+      if (err) throw err;
+      console.table(response);
+    });
+  }
 
 function addDepartment() {
   inquirer
@@ -148,6 +164,66 @@ function addRole() {
           exit();
       })
   })
+}
+
+function addEmployee() {
+    viewRoles2();
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'roleId',
+            message: 'What is the role ID for this employee?'
+        },
+        {
+            type: 'input',
+            name: 'firstName',
+            message: 'What is the employees first name?'
+        },
+        {
+            type: 'input',
+            name: 'lastName',
+            message: 'What is the employees last name?'
+        }
+    ]).then(answers => {
+        const firstName = answers.firstName;
+        const lastName = answers.lastName;
+        const roleId = answers.roleId;
+        const managerId = null;
+
+        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+        db.query(sql, [firstName, lastName, roleId, managerId], (err, response) => {
+            if (err) throw err;
+            console.log(`You have added ${firstName} ${lastName} as an employee!`);
+            exit();
+        })
+    })
+}
+
+function updateEmployee() {
+    viewEmployees2();
+    viewRoles2();
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'employeeId',
+            message: 'What is the ID of the employee you wish to update?'
+        },
+        {
+            type: 'input',
+            name: 'updatedRole',
+            message: 'What is the role you want to assign to this employee?'
+        }
+    ]).then(answers => {
+        const employeeId = answers.employeeId;
+        const updatedRole = answers.updatedRole;
+
+        const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+        db.query(sql, [updatedRole, employeeId], (err, response) => {
+            if (err) throw err;
+            console.log(`You have updated the employee with the id of ${employeeId}`);
+            exit();
+        })
+    })
 }
 
 function exit() {
